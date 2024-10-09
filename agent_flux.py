@@ -1,32 +1,15 @@
 import replicate
 import requests
 
+
 class FluxAgent:
     def __init__(self):
         self.name = "FluxBot"
 
-    def generate_image_2(self, prompt):
-        url = "https://api.together.xyz/v1/images/generations"
-
-        payload = {
-            "prompt": prompt,
-            "model": "black-forest-labs/FLUX.1-schnell",
-            "steps": 4,
-            "n": 1,
-            "height": 1024,
-            "width": 1024
-        }
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "authorization": "Bearer b70439b4f44017218b2295b996a7f4d202a567243de9ed9fad4b44099b9c346b"
-        }
-        response = requests.post(url, headers=headers)
-        return response.text
     def generate_image(self, model, prompt, steps, controlnet, image_url):
         input = {
-            "width": 856,
-            "height": 1156,
+            "width": 1024,
+            "height": 1024,
             "guidance": 3.5,
             "prompt": prompt,
             "output_format": "png",

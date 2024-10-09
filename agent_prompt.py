@@ -16,20 +16,7 @@ class PromptAgent:
             self.model = "meta-llama/Llama-3.2-3B-Instruct-Turbo"
 
         self.messages = []
-        self.genders = ["female"]
-        self.ethnicities = [
 
-            "African American",
-            "Afro-Caribbean",
-            "Asian",
-            "Caucasian",
-            "Chinese",
-            "Eastern European",
-            "Japanese",
-            "Korean",
-            "Latino",
-            "Scandinavian",
-        ]
         self.system_prompt = (
             'You are a stable diffusion prompt generating AI, you create prompts optimized for T5 Encoder Text Linear '
             'Projection.\n'

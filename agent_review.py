@@ -55,6 +55,7 @@ class ReviewAgent:
         return message.choices[0].message.content
 
     def review_image(self, url):
+        """ Image halving is current disabled because llama vision is free!"""
         #image = Image.open(image_path)
         # Halve the image size before encoding it
         #resized_image = self.halve_image_size(image)
