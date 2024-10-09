@@ -1,4 +1,3 @@
-import io
 import asyncio
 import time
 
@@ -11,10 +10,12 @@ from tokenizer import Tokenizer
 
 
 async def update_timer(label, start_time):
+    """ Starts a timer and updates the given label with elapsed time"""
     while True:
         elapsed_time = time.time() - start_time
         label.set_text(f"Elapsed time: {elapsed_time:.2f} seconds")
         await asyncio.sleep(0.1)  # Update every 100ms
+
 
 async def generate_prompts():
     """ uses prompt agent to generate an embellished prompt from the user's initial prompt """
@@ -40,6 +41,7 @@ async def shrink_prompt():
 
 
 async def improve_prompt():
+    """ Asks an LLM to improve the prompt based on the suggested improvements from the review """
     review_dialog.close()
     user_style = styles[style_toggle.value]
     improvements_prompt = ('Use the following improvements to make improvements to the following prompt:\n'
@@ -52,11 +54,15 @@ async def improve_prompt():
     prompt_textarea.value = generated_prompt
     spinner.visible = False
 
+
 def update_sequence_length():
+    """ Keeps the sequence length variable updated if the prompt is changed """
     token_count = tokenizer.get_sequence_length(prompt_textarea.value)
     sequence_length.set_text("Sequence Length: {}/256".format(token_count))
 
+
 async def generate_image():
+    """ Uses Flux Agent to create an image from the prompt """
     prompt = prompt_textarea.value
     with image:
         spinner = ui.spinner(size='xl')
@@ -78,7 +84,10 @@ async def generate_image():
     flux_button.style('visibility: visible')
     spinner.visible = False
     stopwatch_label.set_text(f"Final time: {time.time() - start_time:.2f} seconds")
+
+
 async def generate_image_flux_dev():
+    """ Creates a flux dev image from the prompt and uses the image as a controlnet """
     prompt = prompt_textarea.value
     control_url = image.source
     with image:
@@ -96,7 +105,9 @@ async def generate_image_flux_dev():
     sdxl_button.style('visibility: visible')
     spinner.visible = False
 
+
 async def review_image():
+    """ Ask the LLM to provide suggestions on how to improve the image """
     review_dialog.open()
     with review_dialog:
         review_spinner = ui.spinner(size='xl')
@@ -104,10 +115,8 @@ async def review_image():
     review_spinner.visible = False
 
 
-
-
-
 async def generate_sdxl():
+    """ Uses a local Automatic 1111 installation to create an SDXL image to image rendering """
     # Start the processing timer
     start_time = time.time()
     timer_task = asyncio.create_task((update_timer(stopwatch_label, start_time)))
@@ -132,11 +141,6 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
         # Create the input field and button
         user_input = ui.textarea('Enter your prompt:').props('autogrow').style(
             'width:75%')  # Store the input field in a variable for later access
-        with ui.row():
-            style_chip_1 = ui.chip('Photograph', icon='photo_camera', selectable=True, color='orange')
-            style_chip_2 = ui.chip('Illustration', icon='gesture', selectable=True, color='blue')
-            style_chip_3 = ui.chip('Oil Painting', icon='brush', selectable=True, color='green')
-        ui.label(style_chip_1.text)
         style_toggle = ui.toggle(styles)
         ui.button('get a prompt', on_click=generate_prompts)
         prompt_textarea = ui.textarea(value="Prompt",
@@ -152,7 +156,7 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
     with ui.column().classes('w-1/2 pr-20 pt-10'):
         stopwatch_label = ui.label()
         image = ui.image().style('width: 100%; height: 60%; background-color: silver')
-        image.source = 'placeholder.png'
+        image.source = 'images/placeholder.png'
         image_label = ui.label().style('visibility: hidden')
         with ui.row(align_items='center'):
             review_button = ui.button('rate image', on_click=review_image).style('visibility: hidden')
