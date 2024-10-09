@@ -1,7 +1,10 @@
-from PIL import Image
+import time
 import requests
 import io
 import base64
+import os
+from PIL import Image
+
 
 
 class SDXLAgent:
@@ -43,6 +46,7 @@ class SDXLAgent:
         sd_image.save('final_upscaled.png')
 
     def img2img(self, img2img_prompt, counter, image_path, image_url, adetailer):
+
         if counter == 1:
             encoded_image = self.download_and_encode_image(image_url)
         else:
@@ -80,9 +84,12 @@ class SDXLAgent:
 
         response = requests.post(url=f'{self.api_url}/sdapi/v1/img2img', json=payload)
         r = response.json()
+        file_path = f'images/sdxl_image_{time.time()}.png'
+        if os.path.exists(file_path):
+            os.remove(file_path)
         sd_image = Image.open(io.BytesIO(base64.b64decode(r['images'][0])))
-        sd_image.save('test_img2img_{}.png'.format(counter))
-
+        sd_image.save(file_path)
+        return file_path
 
     def txt2img(self, prompt, id, hires, adetailer, controlnet, image_url):
 

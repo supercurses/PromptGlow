@@ -6,6 +6,7 @@ from together import Together
 class PromptAgent:
     """A class to ask an LLM to provide Stable Diffusion prompts based on guidance from the user
     Llama 3.2 is a little unreliable at randomness, so we use a genders and ethnicities list to create some variation"""
+
     def __init__(self, local):
         self.local = local
         if self.local:
@@ -18,28 +19,21 @@ class PromptAgent:
         self.messages = []
 
         self.system_prompt = (
-            'You are a stable diffusion prompt generating AI, you create prompts optimized for T5 Encoder Text Linear '
-            'Projection.\n'
-            'Process requests in three stages. \n'
-            'Stage1: identify best practices when creating stable diffusion t5 encoder prompt keywords\n'
-            'Stage2: identify a random modern day well known creator of the given style.\n'
-            'Stage3: Generate your prompt utilizing those best practices'
-            'Begin the prompt with inspired by [name of creator you chose], [style]'
-            'if a photograph, Control depth of field by specifying lens.'
-            'Pay attention to describing different lighting techniques.'
-            'Pay attention to any compositional advice you receive.'
-            'Prompt interesting poses. Prompt interesting camera angles.'
-            'ONLY provide the prompt in your output, do not include any commentary'
-            'describe the image in the following order\n'
-            '1. who the creator is\n'
-            '2. what the image is of and scene\n'
-            '3. any lighting and lens effects (if the style is a photograph)'
+            "Your task is to provide prompts optimized for generating AI images. Follow these rules:\n\n"
+            "- Use clear well-structured language. Avoid overly long convoluted sentences. Stick to natural clear grammar with a focus on the meaning of the sentence.\n"
+            "- Use descriptive language but don't overload the prompt with excessive adjectives or details. Make sure every prompt serves to visualize and contextualize the scene.\n"
+            "- Avoid adding irrelevant or conflicting details that may distract from the main focus.\n"
+            "- Specify the style or medium.\n"
+            "- Focus on important scene elements.\n"
+            "- Include context or actions that might occur in the scene."
         )
+
         self.messages.append({"role": "system", "content": self.system_prompt})
         self.prompts = []
 
     def generate_message(self, messages):
         """ Attempt to get a response from the AI API"""
+        print(messages)
         try:
             if not self.local:
                 response = self.client.chat.completions.create(
@@ -63,8 +57,9 @@ class PromptAgent:
         except Exception as e:
             return {"error": str(e)}
 
-    def generate_prompt(self, prompt, style):
-        self.messages.append({"role": "user", "content": prompt + "\nstyle: {}".format(style)})
+    def generate_prompt(self, prompt):
+        #self.messages.append({"role": "user", "content": prompt + "\nstyle: {}".format(style)})
+        self.messages.append({"role": "user", "content": prompt})
         ai_response = self.generate_message(messages=self.messages)
         self.messages.append({"role": "assistant", "content": ai_response.choices[0].message.content})
         self.prompts.append(ai_response.choices[0].message.content)
@@ -76,4 +71,16 @@ class PromptAgent:
         ai_response = self.generate_message(messages=self.messages)
         self.messages.append({"role": "assistant", "content": ai_response.choices[0].message.content})
         self.prompts.append(ai_response.choices[0].message.content)
+        return ai_response.choices[0].message.content
+
+    def generate_clip_prompt(self, prompt):
+        clip_system_prompt = ('Your task is to convert a stable diffusion prompt that has been optimized for t5'
+                              'encoding into a prompt that has been optimized for CLIP encoding. Only provide the new '
+                              'prompt in your response.\n'
+                              'Example:\n'
+                              'Grey car park, dog under car, wet fur, barking, rain, smeared wheels, slick pavement')
+        clip_prompt = []
+        clip_prompt.append({"role": "system", "content": clip_system_prompt})
+        clip_prompt.append({"role": "user", "content": prompt})
+        ai_response = self.generate_message(messages=clip_prompt)
         return ai_response.choices[0].message.content
