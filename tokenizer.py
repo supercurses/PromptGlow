@@ -12,5 +12,3 @@ class Tokenizer:
         tokens = tokenizer.tokenize(prompt)
         return len(tokens)
 
-tk = Tokenizer()
-print(tk.get_sequence_length("Hello you, I am you"))
