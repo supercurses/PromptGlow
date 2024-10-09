@@ -146,8 +146,6 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
         prompt_textarea = ui.textarea(value="Prompt",
                                       on_change=lambda e: update_sequence_length()).props('autogrow').style('width:75%')
 
-        # Create a placeholder label to display the generated prompt
-        prompt_display = ui.label('Your generated prompt will appear here.')
         sequence_length = ui.label('Sequence Length')
         with ui.row():
             ui.button('shrink prompt', on_click=shrink_prompt)
