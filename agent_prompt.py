@@ -33,7 +33,6 @@ class PromptAgent:
 
     def generate_message(self, messages):
         """ Attempt to get a response from the AI API"""
-        print(messages)
         try:
             if not self.local:
                 response = self.client.chat.completions.create(
