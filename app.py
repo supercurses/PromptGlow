@@ -210,7 +210,7 @@ tokenizer = Tokenizer()
 styles = {1: 'photograph', 2: 'illustration', 3: 'oil painting'}
 flux_image_urls = []
 
-with ui.row().style('gap:10em').classes('w-full no-wrap'):
+with ui.row().style('gap:2em').classes('w-full no-wrap'):
     with ui.column().classes('w-1/2 pl-20 pt-10'):
         # Create the input field and button
         user_input = ui.textarea('Enter your prompt:').style(
@@ -225,11 +225,8 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
             ui.button('shrink prompt', on_click=shrink_prompt)
             flux_generate_button = ui.button('generate image', on_click=generate_image)
 
-    with ui.column().classes('w-1/2 pr-20 pt-10'):
+    with ui.column().classes('w-1/2 pt-10'):
         stopwatch_label = ui.label()
-        # flux_image = ui.image().style('width: 100%; height: 60%; background-color: silver')
-        # flux_image.source = 'images/placeholder.png'
-        flux_image_label = ui.label().style('visibility: hidden')
         with ui.carousel(animated=True, arrows=True, navigation=True, on_value_change=set_current_image).props(
                 "height=600px") as carousel_placeholder:
             with ui.carousel_slide():
@@ -239,7 +236,7 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
             review_button = ui.button('rate image', on_click=review_image).style('visibility: hidden')
             sdxl_button = ui.button('SDXL', on_click=sdxl_dialog_manager).style('visibility: hidden')
             flux_button = ui.button('send to flux dev', on_click=generate_image_flux_dev).style('visibility: hidden')
-
+            flux_image_label = ui.label().style('visibility: hidden')
 with ui.dialog() as review_dialog, ui.card().style('width:50%; max-width: none') as review_card:
     with ui.row() as review_row:
         review = ui.markdown('Gathering feedback...')
