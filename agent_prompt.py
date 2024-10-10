@@ -18,7 +18,7 @@ class PromptAgent:
 
         self.messages = []
 
-        self.system_prompt = (
+        self.t5_system_prompt = (
             "Your task is to provide prompts optimized for generating AI images. Follow these rules:\n\n"
             "- Use clear well-structured language. Avoid overly long convoluted sentences. Stick to natural clear grammar with a focus on the meaning of the sentence.\n"
             "- Use descriptive language but don't overload the prompt with excessive adjectives or details. Make sure every prompt serves to visualize and contextualize the scene.\n"
@@ -27,8 +27,13 @@ class PromptAgent:
             "- Focus on important scene elements.\n"
             "- Include context or actions that might occur in the scene."
         )
+        self.clip_system_prompt = ('Your task is to convert a stable diffusion prompt that has been optimized for t5'
+                              'encoding into a prompt that has been optimized for CLIP encoding. Only provide the new '
+                              'prompt in your response.\n'
+                              'Example:\n'
+                              'Grey car park, dog under car, wet fur, barking, rain, smeared wheels, slick pavement')
 
-        self.messages.append({"role": "system", "content": self.system_prompt})
+
         self.prompts = []
 
     def generate_message(self, messages):
@@ -57,10 +62,10 @@ class PromptAgent:
             return {"error": str(e)}
 
     def generate_prompt(self, prompt):
-        #self.messages.append({"role": "user", "content": prompt + "\nstyle: {}".format(style)})
-        self.messages.append({"role": "user", "content": prompt})
-        ai_response = self.generate_message(messages=self.messages)
-        self.messages.append({"role": "assistant", "content": ai_response.choices[0].message.content})
+        message = []
+        message.append({"role": "system", "content": self.t5_system_prompt})
+        message.append({"role": "user", "content": prompt})
+        ai_response = self.generate_message(messages=message)
         self.prompts.append(ai_response.choices[0].message.content)
         return ai_response.choices[0].message.content
 
@@ -73,13 +78,8 @@ class PromptAgent:
         return ai_response.choices[0].message.content
 
     def generate_clip_prompt(self, prompt):
-        clip_system_prompt = ('Your task is to convert a stable diffusion prompt that has been optimized for t5'
-                              'encoding into a prompt that has been optimized for CLIP encoding. Only provide the new '
-                              'prompt in your response.\n'
-                              'Example:\n'
-                              'Grey car park, dog under car, wet fur, barking, rain, smeared wheels, slick pavement')
         clip_prompt = []
-        clip_prompt.append({"role": "system", "content": clip_system_prompt})
+        clip_prompt.append({"role": "system", "content": self.clip_system_prompt})
         clip_prompt.append({"role": "user", "content": prompt})
         ai_response = self.generate_message(messages=clip_prompt)
         return ai_response.choices[0].message.content
