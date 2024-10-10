@@ -19,8 +19,17 @@ class PromptAgent:
         self.messages = []
 
         self.t5_system_prompt = (
-            "Your task is to provide prompts optimized for generating AI images. Follow these rules:\n\n"
-            "- Use clear well-structured language. Avoid overly long convoluted sentences. Stick to natural clear grammar with a focus on the meaning of the sentence.\n"
+            "Your task is to provide prompts optimized for generating AI images.\n\n"
+            "Process in two stages:\n\n"
+            "1. If a type of art and media is provided, identify a well-known expert of that type of art/media in your prompt.\n"
+            "Example input:\n"
+            "type of art: photograph\n"
+            "media: digital\n"
+            "prompt: girl riding a bicycle\n"
+            "expected output\n"
+            "photograph in the style of Erwin Olaf of a young girl riding a bicycle down a dirt path surrounded by tall trees and wildflowers, with a soft focus effect to capture the natural beauty of the scene\n\n"
+            "2. Generate the prompt using these rules:\n"
+            "- Use clear, well-structured language. Avoid overly long convoluted sentences. Stick to natural clear grammar with a focus on the meaning of the sentence.\n"
             "- Use descriptive language but don't overload the prompt with excessive adjectives or details. Make sure every prompt serves to visualize and contextualize the scene.\n"
             "- Avoid adding irrelevant or conflicting details that may distract from the main focus.\n"
             "- Specify the style or medium.\n"
@@ -61,10 +70,10 @@ class PromptAgent:
         except Exception as e:
             return {"error": str(e)}
 
-    def generate_prompt(self, prompt):
+    def generate_prompt(self, art_type, media, prompt):
         message = []
         message.append({"role": "system", "content": self.t5_system_prompt})
-        message.append({"role": "user", "content": prompt})
+        message.append({"role": "user", "content": "Art Type: " + art_type + "\nMedia:" + media + "\nPrompt:" + prompt})
         ai_response = self.generate_message(messages=message)
         self.prompts.append(ai_response.choices[0].message.content)
         return ai_response.choices[0].message.content
