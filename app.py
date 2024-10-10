@@ -75,24 +75,31 @@ async def generate_image():
     """ Uses Flux Agent to create an image from the prompt """
     prompt = prompt_textarea.value
     flux_generate_button.disable()
+    timer_task = None
+    urls = None
+    start_time = time.time()
     with carousel_placeholder:
         spinner = ui.spinner(size='xl')
         spinner.visible = True
     try:
         # Start the processing timer
-        start_time = time.time()
+
         timer_task = asyncio.create_task((update_timer(stopwatch_label, start_time)))
         urls = await run.io_bound(flux_agent.generate_image, model="black-forest-labs/flux-schnell",
                                   prompt=prompt, steps=4, controlnet=False, image_url=None)
     except Exception as e:
         ui.notify(f'Unable to get an image: {str(e)}', type='negative')
     finally:
-        timer_task.cancel()
+        if timer_task:
+            timer_task.cancel()
         flux_generate_button.enable()
         # End the timer
         end_time = time.time()
-        url = urls[0]
-        flux_image_urls.append(url)
+        if urls:
+            url = urls[0]
+            flux_image_urls.append(url)
+        else:
+            ui.notify('No valid image url returned', type='negative')
         review_button.style('visibility: visible')
         sdxl_button.style('visibility: visible')
         flux_button.style('visibility: visible')
@@ -105,6 +112,7 @@ async def generate_image_flux_dev():
     """ Creates a flux dev image from the prompt and uses the image as a controlnet """
     prompt = prompt_textarea.value
     control_url = flux_image_label.text
+    urls = None
     with carousel_placeholder:
         spinner = ui.spinner(size='xl')
         spinner.visible = True
@@ -117,8 +125,9 @@ async def generate_image_flux_dev():
     except Exception as e:
         ui.notify(f'Unable to get an image: {str(e)}', type='negative')
     finally:
-        url = urls[0]
-        flux_image_urls.append(url)
+        if urls:
+            url = urls[0]
+            flux_image_urls.append(url)
         review_button.style('visibility: visible')
         sdxl_button.style('visibility: visible')
         spinner.visible = False
@@ -174,6 +183,7 @@ async def generate_sdxl():
     # Start the processing timer
     start_time = time.time()
     timer_task = asyncio.create_task((update_timer(sdxl_stopwatch_label, start_time)))
+    file_path = None
     try:
         file_path = await run.io_bound(sdxl_agent.img2img, img2img_prompt=prompt_textarea.value,
                                        counter=1,
@@ -185,7 +195,10 @@ async def generate_sdxl():
         ui.notify(f'Unable to get an image: {str(e)}', type='negative')
     finally:
         timer_task.cancel()
-        sdxl_image.source = file_path
+        if file_path:
+            sdxl_image.source = file_path
+        else:
+            ui.notify('No valid file path returned to display', type='negative')
 
 
 prompts = []
