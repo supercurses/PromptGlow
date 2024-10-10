@@ -232,7 +232,7 @@ async def generate_sdxl():
 
 prompts = []
 flux_agent = FluxAgent()
-prompt_agent = PromptAgent(local=False)
+prompt_agent = PromptAgent(local=True)
 review_agent = ReviewAgent()
 sdxl_agent = SDXLAgent()
 tokenizer = Tokenizer()
@@ -264,8 +264,8 @@ with ui.row().style('gap:2em').classes('w-full no-wrap'):
 
     with ui.column().classes('w-1/2 pt-10'):
         stopwatch_label = ui.label()
-        with ui.carousel(animated=True, arrows=True, navigation=True, on_value_change=set_current_image).props(
-                "height=600px") as carousel_placeholder:
+        with ui.carousel(animated=True, arrows=True, navigation=False, on_value_change=set_current_image).props(
+                "height=600px control-color=blue control-text-color=white control-type=white") as carousel_placeholder:
             with ui.carousel_slide():
                 placeholder_image = ui.image('images/placeholder.png').classes('w-[600px] h-[600px]')
 
