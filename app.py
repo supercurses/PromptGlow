@@ -19,9 +19,8 @@ async def update_timer(label, start_time):
         await asyncio.sleep(0.1)  # Update every 100ms
 
 
-async def generate_prompts(timeout=1):
+async def generate_prompts():
     """ uses prompt agent to generate an embellished prompt from the user's initial prompt """
-    user_prompt = user_input.value
     generated_prompt = None
     # Start up the spinner
     with prompt_textarea:
@@ -29,7 +28,9 @@ async def generate_prompts(timeout=1):
         spinner.visible = True
     try:
         generated_prompt = await run.io_bound(prompt_agent.generate_prompt,
-                                              prompt=user_prompt)
+                                              art_type=art_type.value,
+                                              media=media.value,
+                                              prompt=user_prompt.value)
     except Exception as e:
         ui.notify(f'Unable to get a prompt: {e}', type='negative')
         print('timeout')
@@ -65,6 +66,8 @@ async def improve_prompt():
         spinner = ui.spinner('dots', size='xl')
         spinner.visible = True
     generated_prompt = await run.io_bound(prompt_agent.generate_prompt,
+                                          art_type=art_type.value,
+                                          media=media.value,
                                           prompt=improvements_prompt)  # Actual prompt generation
     prompt_textarea.value = generated_prompt
     spinner.visible = False
@@ -165,6 +168,17 @@ def update_carousel():
                 ui.image(url).classes('w-[600px]')
     set_current_image()
 
+def update_media():
+    selected_art_type = art_type.value
+    if selected_art_type == 'Animation':
+        media.options = animation_media
+    elif selected_art_type == 'Photograph':
+        media.options = photograph_media
+    elif selected_art_type == 'Drawing':
+        media.options = drawing_media
+    elif selected_art_type == 'Painting':
+        media.options = painting_media
+    media.update()
 
 def set_current_image():
     if not flux_image_urls:
@@ -209,17 +223,25 @@ async def generate_sdxl():
 
 prompts = []
 flux_agent = FluxAgent()
-prompt_agent = PromptAgent(local=False)
+prompt_agent = PromptAgent(local=True)
 review_agent = ReviewAgent()
 sdxl_agent = SDXLAgent()
 tokenizer = Tokenizer()
-styles = {1: 'photograph', 2: 'illustration', 3: 'oil painting'}
+
 flux_image_urls = []
+animation_media = ['Cut-Out', 'Claymation', 'Cel', 'Computer', 'Stop Motion', '3D Pixar', '3D']
+photograph_media = ['Film', 'Digital']
+drawing_media = ['Brush', 'Finger', 'Pen', 'Ballpoint Pen', 'Eraser', 'Fountain Pen', 'Technical Pen', 'Marker',
+                 'Pencil', 'Colored Pencil', 'Charcoal', 'Crayon', 'Pastel', 'Conte', 'Chalk']
+painting_media = ['Oil', 'Acrylic', 'Watercolor', 'Gouache', 'Coffee']
+
 
 with ui.row().style('gap:2em').classes('w-full no-wrap'):
     with ui.column().classes('w-1/2 pl-20 pt-10'):
         # Create the input field and button
-        user_input = ui.textarea('Enter your prompt:').style(
+        art_type = ui.select(['Animation', 'Photograph', 'Drawing', 'Painting'], label='Art Type').style('width:75%').on_value_change(update_media)
+        media = ui.select([], label='Media').style('width:75%')
+        user_prompt = ui.textarea('Enter your prompt:').style(
             'width:75%')  # Store the input field in a variable for later access
         ui.button('get a prompt', on_click=generate_prompts)
         prompt_textarea = ui.textarea('Embellished Prompt',
