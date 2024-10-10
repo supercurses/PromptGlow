@@ -121,11 +121,14 @@ async def generate_image_flux_dev():
     """ Creates a flux dev image from the prompt and uses the image as a controlnet """
     prompt = prompt_textarea.value
     control_url = flux_image_label.text
+    timer_task = None
+    start_time = time.time()
     urls = None
     with carousel_placeholder:
         spinner = ui.spinner(size='xl')
         spinner.visible = True
     try:
+        timer_task = asyncio.create_task((update_timer(stopwatch_label, start_time)))
         urls = await run.io_bound(flux_agent.generate_image,
                                   model="xlabs-ai/flux-dev-controlnet"
                                         ":f2c31c31d81278a91b2447a304dae654c64a5d5a70340fba811bb1cbd41019a2",
@@ -134,6 +137,10 @@ async def generate_image_flux_dev():
     except Exception as e:
         ui.notify(f'Unable to get an image: {str(e)}', type='negative')
     finally:
+        if timer_task:
+            timer_task.cancel()
+        # End the timer
+        end_time = time.time()
         if urls:
             url = urls[0]
             flux_image_urls.append(url)
