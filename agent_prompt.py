@@ -28,12 +28,12 @@ class PromptAgent:
             "- Include context or actions that might occur in the scene."
         )
         self.clip_system_prompt = ('Your task is to convert a stable diffusion prompt that has been optimized for t5'
-                              'encoding into a prompt that has been optimized for CLIP encoding. Only provide the new '
-                              'prompt in your response.\n'
-                              'Example:\n'
-                              'Grey car park, dog under car, wet fur, barking, rain, smeared wheels, slick pavement')
-
-
+                                   'encoding into a prompt that has been optimized for CLIP encoding. Only provide '
+                                   'the new prompt in your response.\n'
+                                   'Example:\n'
+                                   'Grey car park, dog under car, wet fur, barking, rain, smeared wheels, '
+                                   'slick pavement')
+        self.shrink_system_prompt = 'Reduce the number of words in the provided prompt while retaining the meaning'
         self.prompts = []
 
     def generate_message(self, messages):
@@ -70,16 +70,16 @@ class PromptAgent:
         return ai_response.choices[0].message.content
 
     def shrink_prompt(self, prompt):
-        self.messages.append({"role": "user", "content": "reduce the number of words in the following prompt while "
-                                                         "retaining the meaning. Prompt: {}".format(prompt)})
-        ai_response = self.generate_message(messages=self.messages)
-        self.messages.append({"role": "assistant", "content": ai_response.choices[0].message.content})
+        message = []
+        message.append({"role": "system", "content": self.shrink_system_prompt})
+        message.append({"role": "user", "content": prompt})
+        ai_response = self.generate_message(messages=message)
         self.prompts.append(ai_response.choices[0].message.content)
         return ai_response.choices[0].message.content
 
     def generate_clip_prompt(self, prompt):
-        clip_prompt = []
-        clip_prompt.append({"role": "system", "content": self.clip_system_prompt})
-        clip_prompt.append({"role": "user", "content": prompt})
-        ai_response = self.generate_message(messages=clip_prompt)
+        message = []
+        message.append({"role": "system", "content": self.clip_system_prompt})
+        message.append({"role": "user", "content": prompt})
+        ai_response = self.generate_message(messages=message)
         return ai_response.choices[0].message.content
