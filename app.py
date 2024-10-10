@@ -22,7 +22,6 @@ async def update_timer(label, start_time):
 async def generate_prompts():
     """ uses prompt agent to generate an embellished prompt from the user's initial prompt """
     user_prompt = user_input.value
-    user_style = styles[style_toggle.value]
     # Start up the spinner
     with prompt_textarea:
         spinner = ui.spinner('dots', size='xl')
@@ -55,14 +54,13 @@ async def generate_clip_prompt():
 async def improve_prompt():
     """ Asks an LLM to improve the prompt based on the suggested improvements from the review """
     review_dialog.close()
-    user_style = styles[style_toggle.value]
     improvements_prompt = ('Use the following improvements to make improvements to the following prompt:\n'
                            'Improvements: {} \n Prompt:{}'.format(review.content, prompt_textarea.value))
     with prompt_textarea:
         spinner = ui.spinner('dots', size='xl')
         spinner.visible = True
     generated_prompt = await run.io_bound(prompt_agent.generate_prompt,
-                                          prompt=improvements_prompt, style=user_style)  # Actual prompt generation
+                                          prompt=improvements_prompt)  # Actual prompt generation
     prompt_textarea.value = generated_prompt
     spinner.visible = False
 
@@ -123,8 +121,8 @@ async def generate_image_flux_dev():
 async def review_image():
     """ Ask the LLM to provide suggestions on how to improve the image """
     review_dialog.open()
-    with review_dialog:
-        review_spinner = ui.spinner(size='xl')
+    with review_row:
+        review_spinner = ui.spinner('dots', size='xl')
     review.content = await run.io_bound(review_agent.review_image, url=flux_image_label.text)
     review_spinner.visible = False
 
@@ -158,7 +156,6 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
         # Create the input field and button
         user_input = ui.textarea('Enter your prompt:').style(
             'width:75%')  # Store the input field in a variable for later access
-        style_toggle = ui.toggle(styles)
         ui.button('get a prompt', on_click=generate_prompts)
         prompt_textarea = ui.textarea('Embellished Prompt',
                                       on_change=lambda e: update_sequence_length()).props('autogrow').style('width:75%;')
@@ -179,8 +176,9 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
             flux_button = ui.button('send to flux dev', on_click=generate_image_flux_dev).style('visibility: hidden')
 
 
-with ui.dialog() as review_dialog, ui.card().style('width:50%; max-width: none'):
-    review = ui.markdown()
+with ui.dialog() as review_dialog, ui.card().style('width:50%; max-width: none') as review_card:
+    with ui.row() as review_row:
+        review = ui.markdown('Gathering feedback...')
     with ui.row():
         ui.button('Improve Prompt', on_click=improve_prompt)
         ui.button('Close', on_click=review_dialog.close)
