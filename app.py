@@ -33,7 +33,6 @@ async def generate_prompts():
                                               prompt=user_prompt.value)
     except Exception as e:
         ui.notify(f'Unable to get a prompt: {e}', type='negative')
-        print('timeout')
     finally:
         prompt_textarea.value = generated_prompt
         spinner.visible = False
@@ -232,13 +231,13 @@ async def generate_sdxl():
 
 prompts = []
 flux_agent = FluxAgent()
-prompt_agent = PromptAgent(local=True)
+prompt_agent = PromptAgent(local=False)
 review_agent = ReviewAgent()
 sdxl_agent = SDXLAgent()
 tokenizer = Tokenizer()
 
 flux_image_urls = []
-animation_media = ['Cut-Out', 'Claymation', 'Cel', 'Computer', 'Stop Motion', '3D Pixar', '3D']
+animation_media = ['Cut-Out', 'Claymation', 'Cel', 'Computer', 'Stop Motion', '3D Pixar', '3D', 'Simpsons']
 photograph_media = ['Film', 'Digital']
 drawing_media = ['Brush', 'Finger', 'Pen', 'Ballpoint Pen', 'Eraser', 'Fountain Pen', 'Technical Pen', 'Marker',
                  'Pencil', 'Colored Pencil', 'Charcoal', 'Crayon', 'Pastel', 'Conte', 'Chalk']
