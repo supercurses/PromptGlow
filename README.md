@@ -30,4 +30,4 @@ pip install -r requirements.txt
 
 Requires a local Automatic 1111 installation running on http://127.0.0.1:7860.
 
-All parameters can be modified in SDXL_agent.py
+All parameters can be modified in agent_SDXL.py
