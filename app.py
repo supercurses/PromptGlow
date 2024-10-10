@@ -172,6 +172,7 @@ def update_carousel():
         for url in reversed(flux_image_urls):
             with ui.carousel_slide():
                 ui.image(url).classes('w-[600px]')
+    carousel_placeholder.value = 'slide_1'
     set_current_image()
 
 def update_media():
