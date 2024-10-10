@@ -185,6 +185,8 @@ def update_media():
         media.options = drawing_media
     elif selected_art_type == 'Painting':
         media.options = painting_media
+    elif selected_art_type == 'Pixel Art':
+        media.options = other_media
     media.update()
 
 def set_current_image():
@@ -241,12 +243,12 @@ photograph_media = ['Film', 'Digital']
 drawing_media = ['Brush', 'Finger', 'Pen', 'Ballpoint Pen', 'Eraser', 'Fountain Pen', 'Technical Pen', 'Marker',
                  'Pencil', 'Colored Pencil', 'Charcoal', 'Crayon', 'Pastel', 'Conte', 'Chalk']
 painting_media = ['Oil', 'Acrylic', 'Watercolor', 'Gouache', 'Coffee']
-
+other_media = ['1Bit', '8bit', '16Bit']
 
 with ui.row().style('gap:2em').classes('w-full no-wrap'):
     with ui.column().classes('w-1/2 pl-20 pt-10'):
         # Create the input field and button
-        art_type = ui.select(['Animation', 'Photograph', 'Drawing', 'Painting'], label='Art Type').style('width:75%').on_value_change(update_media)
+        art_type = ui.select(['Animation', 'Photograph', 'Drawing', 'Painting','Pixel Art'], label='Art Type').style('width:75%').on_value_change(update_media)
         media = ui.select([], label='Media').style('width:75%')
         user_prompt = ui.textarea('Enter your prompt:').style(
             'width:75%')  # Store the input field in a variable for later access
