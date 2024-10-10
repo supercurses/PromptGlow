@@ -19,18 +19,23 @@ async def update_timer(label, start_time):
         await asyncio.sleep(0.1)  # Update every 100ms
 
 
-async def generate_prompts():
+async def generate_prompts(timeout=1):
     """ uses prompt agent to generate an embellished prompt from the user's initial prompt """
     user_prompt = user_input.value
+    generated_prompt = None
     # Start up the spinner
     with prompt_textarea:
         spinner = ui.spinner('dots', size='xl')
         spinner.visible = True
-
-    generated_prompt = await run.io_bound(prompt_agent.generate_prompt,
-                                          prompt=user_prompt)
-    prompt_textarea.value = generated_prompt
-    spinner.visible = False
+    try:
+        generated_prompt = await run.io_bound(prompt_agent.generate_prompt,
+                                              prompt=user_prompt)
+    except Exception as e:
+        ui.notify(f'Unable to get a prompt: {e}', type='negative')
+        print('timeout')
+    finally:
+        prompt_textarea.value = generated_prompt
+        spinner.visible = False
 
 
 async def shrink_prompt():
@@ -67,8 +72,9 @@ async def improve_prompt():
 
 def update_sequence_length():
     """ Keeps the sequence length variable updated if the prompt is changed """
-    token_count = tokenizer.get_sequence_length(prompt_textarea.value)
-    sequence_length.set_text("Sequence Length: {}/256".format(token_count))
+    if prompt_textarea.value:
+        token_count = tokenizer.get_sequence_length(prompt_textarea.value)
+        sequence_length.set_text("Sequence Length: {}/256".format(token_count))
 
 
 async def generate_image():
