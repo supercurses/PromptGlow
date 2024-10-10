@@ -75,7 +75,7 @@ async def generate_image():
     """ Uses Flux Agent to create an image from the prompt """
     prompt = prompt_textarea.value
     flux_generate_button.disable()
-    with flux_image:
+    with carousel_placeholder:
         spinner = ui.spinner(size='xl')
         spinner.visible = True
 
@@ -89,20 +89,19 @@ async def generate_image():
     # End the timer
     end_time = time.time()
     url = urls[0]
-    flux_image.source = url
-    flux_image_label.set_text(url)
+    flux_image_urls.append(url)
     review_button.style('visibility: visible')
     sdxl_button.style('visibility: visible')
     flux_button.style('visibility: visible')
     spinner.visible = False
     stopwatch_label.set_text(f"Final time: {time.time() - start_time:.2f} seconds")
-
+    update_carousel()
 
 async def generate_image_flux_dev():
     """ Creates a flux dev image from the prompt and uses the image as a controlnet """
     prompt = prompt_textarea.value
-    control_url = flux_image.source
-    with flux_image:
+    control_url = flux_image_label.text
+    with carousel_placeholder:
         spinner = ui.spinner(size='xl')
         spinner.visible = True
     urls = await run.io_bound(flux_agent.generate_image,
@@ -111,8 +110,8 @@ async def generate_image_flux_dev():
                               prompt=prompt, steps=28,
                               controlnet=True, image_url=control_url)
     url = urls[0]
-    flux_image.source = url
-    flux_image_label.set_text(url)
+    #flux_image.source = url
+    #flux_image_label.set_text(url)
     review_button.style('visibility: visible')
     sdxl_button.style('visibility: visible')
     spinner.visible = False
@@ -128,6 +127,35 @@ async def review_image():
 
 def sdxl_dialog_manager():
     sdxl_dialog.open()
+
+def update_carousel():
+    carousel_placeholder.clear()
+    with carousel_placeholder:
+        for url in reversed(flux_image_urls):
+            with ui.carousel_slide():
+                ui.image(url).classes('w-[600px]')
+    set_current_image()
+
+
+def set_current_image():
+    if not flux_image_urls:
+        # Let's get out of here if we haven't created the list yet
+        return
+    slide_value = carousel_placeholder.value
+
+    # Extract the index from the slide value (e.g., "slide_1" -> 1)
+    slide_index = int(slide_value.replace('slide_', '')) - 1  # Subtract 1 to get zero-based index
+
+    # Since the list was reversed when building the carousel, adjust the index accordingly
+    original_index = len(flux_image_urls) - 1 - slide_index
+
+    # Get the corresponding URL from the original list
+    current_url = flux_image_urls[original_index]
+    flux_image_label.set_text(current_url)
+    sdxl_image.set_source(current_url)
+
+
+
 
 async def generate_sdxl():
     """ Uses a local Automatic 1111 installation to create an SDXL image to image rendering """
@@ -150,6 +178,8 @@ review_agent = ReviewAgent()
 sdxl_agent = SDXLAgent()
 tokenizer = Tokenizer()
 styles = {1: 'photograph', 2: 'illustration', 3: 'oil painting'}
+flux_image_urls = []
+
 
 with ui.row().style('gap:10em').classes('w-full no-wrap'):
     with ui.column().classes('w-1/2 pl-20 pt-10'):
@@ -165,11 +195,16 @@ with ui.row().style('gap:10em').classes('w-full no-wrap'):
             ui.button('shrink prompt', on_click=shrink_prompt)
             flux_generate_button = ui.button('generate image', on_click=generate_image)
 
+
     with ui.column().classes('w-1/2 pr-20 pt-10'):
         stopwatch_label = ui.label()
-        flux_image = ui.image().style('width: 100%; height: 60%; background-color: silver')
-        flux_image.source = 'images/placeholder.png'
+        #flux_image = ui.image().style('width: 100%; height: 60%; background-color: silver')
+        #flux_image.source = 'images/placeholder.png'
         flux_image_label = ui.label().style('visibility: hidden')
+        with ui.carousel(animated=True, arrows=True, navigation=True, on_value_change=set_current_image).props("height=600px") as carousel_placeholder:
+            with ui.carousel_slide():
+                placeholder_image = ui.image('images/placeholder.png').classes('w-[600px] h-[600px]')
+
         with ui.row(align_items='center'):
             review_button = ui.button('rate image', on_click=review_image).style('visibility: hidden')
             sdxl_button = ui.button('SDXL', on_click=sdxl_dialog_manager).style('visibility: hidden')
@@ -188,9 +223,6 @@ with ui.dialog() as sdxl_dialog, ui.card().style('width:50%; max-width:none'):
     sdxl_clip_prompt = ui.textarea().props('autogrow').style('width: 100%')
     ui.button('Get CLIP', on_click=generate_clip_prompt).style('visibility: visible')
     sdxl_image = ui.image().style('height: 60%')
-    # Initially we will use the flux image as our source
-    # It will be replaced with the SDXL image later.
-    sdxl_image.bind_source_from(flux_image)
     sdxl_go_button = ui.button('go', on_click=generate_sdxl).style('visibility: visible')
 
 
