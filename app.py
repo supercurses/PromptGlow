@@ -170,8 +170,12 @@ def update_carousel():
     carousel_placeholder.clear()
     with carousel_placeholder:
         for url in reversed(flux_image_urls):
-            with ui.carousel_slide():
-                ui.image(url).classes('w-[600px]')
+            with ui.carousel_slide().classes('p-0'):
+                with ui.row():
+                    ui.image(url).classes('w-[600px]')
+                    ui.button(icon='fullscreen', on_click=open_lightbox).props('round color=blue').classes('absolute bottom-0 left-0 m-2')
+
+
     carousel_placeholder.value = 'slide_1'
     set_current_image()
 
@@ -205,6 +209,11 @@ def set_current_image():
     current_url = flux_image_urls[original_index]
     flux_image_label.set_text(current_url)
     sdxl_image.set_source(current_url)
+
+def open_lightbox():
+    large_image.set_source(flux_image_label.text)
+    lightbox_dialog.open()
+
 
 
 async def generate_sdxl():
@@ -274,6 +283,7 @@ with ui.row().style('gap:2em').classes('w-full no-wrap'):
             sdxl_button = ui.button('SDXL', on_click=sdxl_dialog_manager).style('visibility: hidden')
             flux_button = ui.button('send to flux dev', on_click=generate_image_flux_dev).style('visibility: hidden')
             flux_image_label = ui.label().style('visibility: hidden')
+
 with ui.dialog() as review_dialog, ui.card().style('width:50%; max-width: none') as review_card:
     with ui.row() as review_row:
         review = ui.markdown('Gathering feedback...')
@@ -287,5 +297,12 @@ with ui.dialog() as sdxl_dialog, ui.card().style('width:50%; max-width:none'):
     ui.button('Get CLIP', on_click=generate_clip_prompt).style('visibility: visible')
     sdxl_image = ui.image().style('height: 60%')
     sdxl_go_button = ui.button('go', on_click=generate_sdxl).style('visibility: visible')
+
+with ui.dialog().props('maximized').classes('bg-black') as lightbox_dialog:
+    with ui.row():
+        large_image = ui.image().props('fit=contain').style('max-height: 100%; max-width: 100%; object-fit: contain')
+        ui.button(icon='close_fullscreen', on_click=lightbox_dialog.close).props('round color=blue').classes(
+                'absolute top-0 right-0 m-2').style('z-index: 100')
+
 
 ui.run()
