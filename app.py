@@ -176,8 +176,7 @@ def main():
                     with ui.row():
                         ui.image(url).classes('w-[600px]')
                         ui.button(icon='fullscreen', on_click=open_lightbox).props('round color=blue').classes('absolute bottom-0 left-0 m-2')
-
-
+                        ui.button(icon='file_download', on_click=lambda: ui.download(src=url)).props('round color=blue').classes('absolute bottom-0 right-0 m-2')
         carousel_placeholder.value = 'slide_1'
         set_current_image()
 
