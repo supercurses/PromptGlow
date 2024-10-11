@@ -17,6 +17,15 @@ Once you've registered, set your account's API key to an environment variable na
 export TOGETHER_API_KEY=xxxxx
 ```
 
+Note: TogetherAI can be slow to generate prompts. It may be faster to generate prompts via a local instance of LM Studio. 
+
+In app.py:
+
+```
+prompt_agent = PromptAgent(local=True)
+```
+
+
 # Installation
 
 ```
