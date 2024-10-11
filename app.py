@@ -216,7 +216,12 @@ def main():
         large_image.set_source(flux_image_label.text)
         lightbox_dialog.open()
 
-
+    def open_system_prompt_dialog():
+        system_prompt_dialog.open()
+    def update_system_prompt():
+        prompt_agent.t5_system_prompt = system_prompt.value
+        system_prompt.update()
+        ui.notify('System Prompt has been changed for this session only.', type='positive')
 
     async def generate_sdxl():
         """ Uses a local Automatic 1111 installation to create an SDXL image to image rendering """
@@ -250,7 +255,6 @@ def main():
     review_agent = ReviewAgent()
     sdxl_agent = SDXLAgent()
     tokenizer = Tokenizer()
-
     flux_image_urls = []
     animation_media = ['Cut-Out', 'Claymation', 'Cel', 'Computer', 'Stop Motion', '3D Pixar', '3D', 'Simpsons']
     photograph_media = ['Film', 'Digital']
@@ -258,6 +262,8 @@ def main():
                      'Pencil', 'Colored Pencil', 'Charcoal', 'Crayon', 'Pastel', 'Conte', 'Chalk']
     painting_media = ['Oil', 'Acrylic', 'Watercolor', 'Gouache', 'Coffee']
     other_media = ['1Bit', '8bit', '16Bit']
+
+
     with ui.row().style('gap:2em').classes('w-full no-wrap'):
         with ui.column().classes('w-1/2 pl-20 pt-10'):
             # Create the input field and button
@@ -265,7 +271,9 @@ def main():
             media = ui.select([], label='Media').style('width:75%')
             user_prompt = ui.textarea('Enter your prompt:').style(
                 'width:75%')  # Store the input field in a variable for later access
-            ui.button('get a prompt', on_click=generate_prompts)
+            with ui.row():
+                ui.button('get a prompt', on_click=generate_prompts)
+                ui.button('edit system prompt', on_click=open_system_prompt_dialog, icon="settings").props('outline')
             prompt_textarea = ui.textarea('Embellished Prompt',
                                           on_change=lambda e: update_sequence_length()).props('autogrow').style(
                 'width:75%;')
@@ -274,6 +282,7 @@ def main():
             with ui.row():
                 ui.button('shrink prompt', on_click=shrink_prompt)
                 flux_generate_button = ui.button('generate image', on_click=generate_image)
+
 
         with ui.column().classes('w-1/2 pt-10'):
             stopwatch_label = ui.label()
@@ -308,5 +317,11 @@ def main():
             ui.button(icon='close_fullscreen', on_click=lightbox_dialog.close).props('round color=blue').classes(
                     'absolute top-0 right-0 m-2').style('z-index: 100')
 
+    with ui.dialog() as system_prompt_dialog, ui.card().style('width:50%; max-width: none'):
+            ui.label('System Prompt').style('font-size: 18pt')
+            system_prompt = ui.textarea(value=prompt_agent.t5_system_prompt).props('autogrow').style('width:100%')
+            ui.button('update', on_click=update_system_prompt)
+
 
 ui.run(title='Prompt Glow')
+
