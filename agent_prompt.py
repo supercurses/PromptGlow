@@ -34,7 +34,9 @@ class PromptAgent:
             "- Avoid adding irrelevant or conflicting details that may distract from the main focus.\n"
             "- Specify the style or medium.\n"
             "- Focus on important scene elements.\n"
-            "- Include context or actions that might occur in the scene."
+            "- Include context or actions that might occur in the scene.\n"
+            "- Only include the prompt in your response, do not include any commentary or reason\n"
+            "- Do not introduce the prompt, for example, do not say 'here is the revised prompt'"
         )
         self.clip_system_prompt = ('Your task is to convert a stable diffusion prompt that has been optimized for t5'
                                    'encoding into a prompt that has been optimized for CLIP encoding. Only provide '
